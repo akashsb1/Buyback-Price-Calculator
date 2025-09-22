@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Agent Price Calculator</title>
+    <!-- Tailwind CSS for modern, responsive styling -->
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         body {
@@ -14,17 +15,19 @@
 </head>
 <body class="bg-gray-100 min-h-screen flex items-center justify-center p-4">
 
+    <!-- Calculator Card -->
     <div class="bg-white rounded-2xl shadow-xl p-8 max-w-xl w-full border border-gray-200">
         <h1 class="text-3xl font-bold text-gray-800 text-center mb-6">Buyback Price Calculator</h1>
 
+        <!-- Input Section -->
         <div class="space-y-6">
             <div>
                 <label for="onRoadPrice" class="block text-sm font-medium text-gray-700">On Road Price (ऑन रोड प्राइस) (Rs.)</label>
-                <input type="number" id="onRoadPrice" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-3 focus:border-blue-500 focus:ring focus:ring-blue-200 focus:ring-opacity-50">
+                <input type="number" id="onRoadPrice" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-3 focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
             </div>
             <div>
                 <label for="downPayment" class="block text-sm font-medium text-gray-700">Down Payment (डाउन पेमेंट) (Rs.)</label>
-                <input type="number" id="downPayment" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-3 focus:border-blue-500 focus:ring focus:ring-blue-200 focus:ring-opacity-50">
+                <input type="number" id="downPayment" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-3 focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
             </div>
         </div>
 
@@ -32,8 +35,10 @@
             Calculate (कैलकुलेट करें)
         </button>
 
+        <!-- Results Section -->
         <div id="results" class="mt-8 space-y-4">
-            </div>
+            <!-- Results will be displayed here dynamically -->
+        </div>
 
         <div id="message-box" class="mt-6 hidden bg-yellow-100 border border-yellow-400 text-yellow-700 px-4 py-3 rounded-md">
             <p id="message-text"></p>
@@ -52,13 +57,11 @@
         /**
          * Shows an error or info message in a styled box.
          * @param {string} message The message to display.
-         * @param {string} colorClass The Tailwind CSS color class for the box.
          */
-        function showMessage(message, colorClass = 'bg-yellow-100 border-yellow-400 text-yellow-700') {
+        function showMessage(message) {
             const msgBox = document.getElementById('message-box');
             const msgText = document.getElementById('message-text');
             msgText.textContent = message;
-            msgBox.className = `mt-6 px-4 py-3 rounded-md ${colorClass}`;
             msgBox.classList.remove('hidden');
         }
 
@@ -76,59 +79,69 @@
          */
         function calculate() {
             clearMessageBox();
-            const resultsContainer = document.getElementById('results');
-            resultsContainer.innerHTML = ''; // Clear previous results
 
             // Get input values
             const onRoadPrice = parseFloat(document.getElementById('onRoadPrice').value);
             const downPayment = parseFloat(document.getElementById('downPayment').value);
 
             // Validate inputs
-            if (isNaN(onRoadPrice) || isNaN(downPayment) || onRoadPrice <= 0 || downPayment < 0) {
+            if (isNaN(onRoadPrice) || isNaN(downPayment) || onRoadPrice < 0 || downPayment < 0) {
                 showMessage("Please enter valid positive numbers for both fields. (कृपया दोनों फ़ील्ड्स में सही और पॉजिटिव नंबर दर्ज करें।)");
                 return;
             }
 
-            // Check for minimum downpayment and handle the invalid case
-            const minDownPaymentRequired = 0.1 * onRoadPrice;
-            if (downPayment < minDownPaymentRequired) {
-                resultsContainer.innerHTML = `
-                    <div class="bg-red-100 border border-red-400 text-red-700 p-4 rounded-lg">
-                        <p class="font-bold">Invalid Downpayment (अमान्य डाउन पेमेंट)</p>
-                        <p>Minimum down payment required is ${formatNumber(minDownPaymentRequired)}.</p>
-                    </div>
-                `;
+            if (downPayment > onRoadPrice) {
+                showMessage("Down payment cannot be greater than the on-road price. (डाउन पेमेंट ऑन-रोड प्राइस से ज्यादा नहीं हो सकती।)");
                 return;
             }
 
             // Calculations based on the provided formulas
             const performaPrice = onRoadPrice + 10000;
+            const extraDownpayment = Math.max(0, (performaPrice * 0.1) - downPayment);
             
-            let loanAmount;
-            if (downPayment < (0.1 * performaPrice)) {
-                loanAmount = performaPrice * 0.9;
-            } else {
+            let loanAmount, moneyToCollectDealer;
+
+            if (extraDownpayment === 0) {
                 loanAmount = performaPrice - downPayment;
+                moneyToCollectDealer = 10000;
+            } else {
+                loanAmount = performaPrice - (downPayment + extraDownpayment);
+                moneyToCollectDealer = 10000;
             }
 
-            const moneyToCollectDealer = loanAmount - (onRoadPrice - downPayment);
+            // Determine the color classes based on whether an extra downpayment is needed
+            const resultColorClass = extraDownpayment > 0 ? 'bg-red-50 border-red-200 text-red-800' : 'bg-blue-50 border-blue-200 text-blue-800';
 
             // Display results
-            const resultColorClass = 'bg-blue-50 border-blue-200 text-blue-800';
+            const resultsContainer = document.getElementById('results');
             resultsContainer.innerHTML = `
-                <div class="${resultColorClass} p-4 rounded-lg">
-                    <p class="text-sm font-semibold text-blue-800">Price to Put on Proforma Invoice (प्रोफॉर्मा इनवॉइस पर डालने की कीमत):</p>
-                    <p class="text-2xl font-bold text-blue-900 mt-1">${typeof performaPrice === 'number' ? formatNumber(performaPrice) : performaPrice}</p>
+                <div class="bg-blue-50 p-4 rounded-lg border border-blue-200">
+                    <p class="text-sm font-semibold text-blue-800">Extra Downpayment to Collect (एक्स्ट्रा डाउन पेमेंट कलेक्ट करें):</p>
+                    <p class="text-2xl font-bold text-blue-900 mt-1">${typeof extraDownpayment === 'number' ? formatNumber(extraDownpayment) : extraDownpayment}</p>
                 </div>
                 <div class="${resultColorClass} p-4 rounded-lg">
-                    <p class="text-sm font-semibold text-blue-800">Loan Amount for Flash App (फ्लैश ऐप में डालने की लोन अमाउंट):</p>
-                    <p class="text-2xl font-bold text-blue-900 mt-1">${typeof loanAmount === 'number' ? formatNumber(loanAmount) : loanAmount}</p>
+                    <p class="text-sm font-semibold ${extraDownpayment > 0 ? 'text-red-800' : 'text-blue-800'}">Price to Put on Proforma Invoice (प्रोफॉर्मा इनवॉइस पर डालने की कीमत):</p>
+                    <p class="text-2xl font-bold ${extraDownpayment > 0 ? 'text-red-900' : 'text-blue-900'} mt-1">${typeof performaPrice === 'number' ? formatNumber(performaPrice) : performaPrice}</p>
                 </div>
                 <div class="${resultColorClass} p-4 rounded-lg">
-                    <p class="text-sm font-semibold text-blue-800">Money to Collect from Dealer (डीलर से कलेक्ट करने वाला पैसा):</p>
-                    <p class="text-2xl font-bold text-blue-900 mt-1">${typeof moneyToCollectDealer === 'number' ? formatNumber(moneyToCollectDealer) : moneyToCollectDealer}</p>
+                    <p class="text-sm font-semibold ${extraDownpayment > 0 ? 'text-red-800' : 'text-blue-800'}">Loan Amount for Flash App (फ्लैश ऐप में डालने की लोन अमाउंट):</p>
+                    <p class="text-2xl font-bold ${extraDownpayment > 0 ? 'text-red-900' : 'text-blue-900'} mt-1">${typeof loanAmount === 'number' ? formatNumber(loanAmount) : loanAmount}</p>
+                </div>
+                <div class="${resultColorClass} p-4 rounded-lg">
+                    <p class="text-sm font-semibold ${extraDownpayment > 0 ? 'text-red-800' : 'text-blue-800'}">Money to Collect from Dealer (डीलर से कलेक्ट करने वाला पैसा):</p>
+                    <p class="text-2xl font-bold ${extraDownpayment > 0 ? 'text-red-900' : 'text-blue-900'} mt-1">${typeof moneyToCollectDealer === 'number' ? formatNumber(moneyToCollectDealer) : moneyToCollectDealer}</p>
                 </div>
             `;
+            // Caution message for extra downpayment
+            if (extraDownpayment > 0) {
+                const cautionMessage = `Extra Downpayment is not equal to zero. Process only after collecting extra downpayment. (एक्स्ट्रा डाउन पेमेंट शून्य नहीं है। एक्स्ट्रा डाउन पेमेंट जमा होने के बाद ही प्रोसेस करें।)`;
+                resultsContainer.innerHTML += `
+                    <div class="mt-4 bg-red-100 p-4 rounded-lg border border-red-400 text-red-700">
+                        <p class="font-bold">Caution (सावधान):</p>
+                        <p>${cautionMessage}</p>
+                    </div>
+                `;
+            }
         }
     </script>
 </body>
