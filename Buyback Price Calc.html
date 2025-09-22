@@ -109,6 +109,9 @@
                 moneyToCollectDealer = 10000;
             }
 
+            // Determine the color classes based on whether an extra downpayment is needed
+            const resultColorClass = extraDownpayment > 0 ? 'bg-red-50 border-red-200 text-red-800' : 'bg-blue-50 border-blue-200 text-blue-800';
+
             // Display results
             const resultsContainer = document.getElementById('results');
             resultsContainer.innerHTML = `
@@ -116,17 +119,17 @@
                     <p class="text-sm font-semibold text-blue-800">Extra Downpayment to Collect (एक्स्ट्रा डाउन पेमेंट कलेक्ट करें):</p>
                     <p class="text-2xl font-bold text-blue-900 mt-1">${typeof extraDownpayment === 'number' ? formatNumber(extraDownpayment) : extraDownpayment}</p>
                 </div>
-                <div class="bg-red-50 p-4 rounded-lg border border-red-200">
-                    <p class="text-sm font-semibold text-red-800">Price to Put on Proforma Invoice (प्रोफॉर्मा इनवॉइस पर डालने की कीमत):</p>
-                    <p class="text-2xl font-bold text-red-900 mt-1">${typeof performaPrice === 'number' ? formatNumber(performaPrice) : performaPrice}</p>
+                <div class="${resultColorClass} p-4 rounded-lg">
+                    <p class="text-sm font-semibold ${extraDownpayment > 0 ? 'text-red-800' : 'text-blue-800'}">Price to Put on Proforma Invoice (प्रोफॉर्मा इनवॉइस पर डालने की कीमत):</p>
+                    <p class="text-2xl font-bold ${extraDownpayment > 0 ? 'text-red-900' : 'text-blue-900'} mt-1">${typeof performaPrice === 'number' ? formatNumber(performaPrice) : performaPrice}</p>
                 </div>
-                <div class="bg-red-50 p-4 rounded-lg border border-red-200">
-                    <p class="text-sm font-semibold text-red-800">Loan Amount for Flash App (फ्लैश ऐप में डालने की लोन अमाउंट):</p>
-                    <p class="text-2xl font-bold text-red-900 mt-1">${typeof loanAmount === 'number' ? formatNumber(loanAmount) : loanAmount}</p>
+                <div class="${resultColorClass} p-4 rounded-lg">
+                    <p class="text-sm font-semibold ${extraDownpayment > 0 ? 'text-red-800' : 'text-blue-800'}">Loan Amount for Flash App (फ्लैश ऐप में डालने की लोन अमाउंट):</p>
+                    <p class="text-2xl font-bold ${extraDownpayment > 0 ? 'text-red-900' : 'text-blue-900'} mt-1">${typeof loanAmount === 'number' ? formatNumber(loanAmount) : loanAmount}</p>
                 </div>
-                <div class="bg-red-50 p-4 rounded-lg border border-red-200">
-                    <p class="text-sm font-semibold text-red-800">Money to Collect from Dealer (डीलर से कलेक्ट करने वाला पैसा):</p>
-                    <p class="text-2xl font-bold text-red-900 mt-1">${typeof moneyToCollectDealer === 'number' ? formatNumber(moneyToCollectDealer) : moneyToCollectDealer}</p>
+                <div class="${resultColorClass} p-4 rounded-lg">
+                    <p class="text-sm font-semibold ${extraDownpayment > 0 ? 'text-red-800' : 'text-blue-800'}">Money to Collect from Dealer (डीलर से कलेक्ट करने वाला पैसा):</p>
+                    <p class="text-2xl font-bold ${extraDownpayment > 0 ? 'text-red-900' : 'text-blue-900'} mt-1">${typeof moneyToCollectDealer === 'number' ? formatNumber(moneyToCollectDealer) : moneyToCollectDealer}</p>
                 </div>
             `;
             // Caution message for extra downpayment
